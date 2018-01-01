@@ -1,0 +1,6 @@
+A fila se forma antes mesmo do restaurante abrir!!
+Segurar o recurso fila principal por um tempo para formar fila, so entao libera-lo
+
+Definir bem tempo medio para pegar uma bandeja e um talher
+Definir bem tempo medio para troca de container de refeicao
+Definir bem quantidade de assentos disponiveis
