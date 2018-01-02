@@ -4,6 +4,8 @@ class ColetaDados(object):
 	qtd_saidas = 0
 	qtd_abastecimentos = [0,0,0,0]
 	
+	qtd_furoes = 0
+	
 	tempo_abastecimentos = 0
 	
 	def __init__ (self):
@@ -11,7 +13,8 @@ class ColetaDados(object):
 		qtd_entradas = 0
 		qtd_saidas = 0
 		qtd_abastecimentos = [0,0,0,0]
-
+		qtd_furoes = 0
+		
 	# Fim __init__
 	
 	def addEntrada(self):
@@ -38,11 +41,24 @@ class ColetaDados(object):
 	
 	# Fim addTempoAbastecimento
 	
+	def addFurao(self):
+		
+		self.qtd_furoes += 1
+		
+	# Fim addFurao
+	
+	def getFurao(self):
+		
+		return self.qtd_furoes
+	
+	# Fim getFurao
+	
 	def printDados(self):
 		print('\n\nEstatisticas:')
 		print('  Quantidade de entradas: %d' % self.qtd_entradas)
 		print('  Quantidade de saidas: %d' % self.qtd_saidas)
 		print('  Throughput: %.2f%%' % ((self.qtd_saidas/self.qtd_entradas)*100))
+		print('  Quantidade de furoes: %d' % self.qtd_furoes)
 		print('  Abastecimentos: %s' % self.qtd_abastecimentos)
 		print('  Custo total de abastecimentos: %d minutos e %d segundos' % ((self.tempo_abastecimentos/60), ((self.tempo_abastecimentos%60))))
 		print('\n')

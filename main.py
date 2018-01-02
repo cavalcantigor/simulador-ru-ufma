@@ -2,6 +2,7 @@ import simpy
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import datetime
 from coletaDados import ColetaDados
 
 # Variaveis globais
@@ -26,7 +27,6 @@ QUANTIDADE_INICIAL_FILA = 30					# Quantidade inicial de pessoas na fila
 
 QTD_REFEICOES_BANDEJA = [150, 230, 80, 130] 	# Quantidade de refeicoes servidas por bandeja
 QTD_INICIAIS_BANDEJAS = [150, 230, 80, 130]		# Quantidades iniciais das refeicoes
-
 
 def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
 
@@ -53,7 +53,7 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	fila_principal.release(req_fila_principal)
 	
 	# Apos ganhar o uso da fila, faz um get_fila para ter ou nao atraso por conta de furo
-	yield env.process(get_fila(env))
+	yield env.process(get_fila(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento))
 	
 	# Cria requisicao pare recurso talher
 	req_talher = recurso_talher.request()
@@ -134,14 +134,120 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	
 # Fim individuo
 
+def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
+	
+	# Adiciona mais uma entrada
+	dados.addEntrada()
+	
+	# Cria requisicao para fila secundaria
+	req_fila_secundaria = fila_secundaria.request()
+	
+	# Requista fila secundaria
+	yield req_fila_secundaria
+	
+	print('%s chegou na fila da esquerda no tempo %.1f' % (nome, env.now))
 
-def get_fila(env):
+	# Apos ganhar o uso da fila, individuo furao apenas pega a fila
+	yield env.timeout(abs(np.random.normal(2, 0.5, size=None))) # Gera um atraso de media 2 variacao 1
+	
+	# Cria requisicao pare recurso talher
+	req_talher = recurso_talher.request()
+	
+	# Requisita recurso talher
+	yield req_talher
+	
+	print('%s chegou para escolher talher no tempo %.1f' % (nome, env.now))
+	
+	# Libera fila secundaria
+	fila_secundaria.release(req_fila_secundaria)
+	
+	# Tempo para escolher talher e bandeja
+	yield env.process(get_talher(env))
+	
+	req_bandeja_1 = recurso_bandeja_1.request()
+	
+	# Requisita recurso bandeja 1
+	yield req_bandeja_1
+	
+	print('%s chegou na bandeja 1 no tempo %.1f' % (nome, env.now))
+	
+	# Libera talher
+	recurso_talher.release(req_talher)
+	
+	# Pega refeicao e reabastece se for o caso
+	yield env.process(get_refeicao(env, 0))
+	
+	req_bandeja_2 = recurso_bandeja_2.request()
+	
+	yield req_bandeja_2
+	
+	print('%s chegou na bandeja 2 no tempo %.1f' % (nome, env.now))
+	
+	recurso_bandeja_1.release(req_bandeja_1)
+	
+	# Pega refeicao e reabastece se for o caso
+	yield env.process(get_refeicao(env, 1))
+	
+	req_bandeja_3 = recurso_bandeja_3.request()
+	
+	yield req_bandeja_3
+	
+	print('%s chegou na bandeja 3 no tempo %.1f' % (nome, env.now))
+	
+	recurso_bandeja_2.release(req_bandeja_2)
+	
+	# Pega refeicao e reabastece se for o caso
+	yield env.process(get_refeicao(env, 2))
+	
+	req_bandeja_4 = recurso_bandeja_4.request()
+	
+	yield req_bandeja_4
+	
+	print('%s chegou na bandeja 4 no tempo %.1f' % (nome, env.now))
+	
+	recurso_bandeja_3.release(req_bandeja_3)
+	
+	# Pega refeicao e reabastece se for o caso
+	yield env.process(get_refeicao(env, 3))
+	
+	req_assento = recurso_assento.request()
+	
+	yield req_assento
+	
+	print('%s chegou no assento no tempo %.1f' % (nome, env.now))
+	
+	recurso_bandeja_4.release(req_bandeja_4)
+	
+	yield env.timeout(abs(np.random.normal(TEMPO_MEDIO_REFEICAO, 3.0, size=None)) * 60)
+	
+	recurso_assento.release(req_assento)
+	
+	print('%s completou seu ciclo e saiu do restaurante no tempo %.1f' % (nome, env.now))
+	
+	# Adicionando uma saida aos dados
+	dados.addSaida()
+	
+# Fim individuo_furao
+
+def get_fila(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
 	
 	# Escolhe um numero entre 1 e 100
 	n = random.randint(1, 100)
 	
 	if n >= PROBABILIDADE_FURO:
-		yield env.timeout(abs(np.random.normal(5, 2.0, size=None))) # Gera um atraso de media 5 variacao 2
+		
+		print('Valor de n: %d' % n)
+		
+		# Incrementa a quantidade de furoes
+		dados.addFurao()
+		
+		print('Furao %d entrou na frente do %s no tempo %d' % (dados.getFurao(), nome, env.now))
+		
+		# Inicia processo do invididuo furao
+		env.process(individuo_furao(env, ('Furao %d' % dados.getFurao()), fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento))
+		
+		# Tempo do furao pegar a fila
+		yield env.timeout(1)
 	else:
 		yield env.timeout(abs(np.random.normal(2, 0.5, size=None))) # Gera um atraso de media 2 variacao 1
 	
@@ -287,12 +393,18 @@ recurso_assento = simpy.Resource(env, 200)
 # Flag para uso na rotina de geracao de individuo
 flag = True
 
+# Seed do random para numeros aleatorios
+random.seed(datetime.datetime.now())
+
 # Processo de geracao de individuos
 proc = env.process(gerador_individuo(env, flag, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento))
 
 # Variaveis para obtencao de grafico da queue da fila principal
 lista_tempos = []
 lista_lotacao = []
+
+# Variavel que controla a quantidade de furoes
+qtd_furoes = 0
 
 # Variavel para obtencao de grafico dos assentos
 lista_assentos_ocupados = []
@@ -315,7 +427,7 @@ print_stats(recurso_bandeja_4, 'Bandeja 4')
 # Printa os dados coletados
 dados.printDados()
 
-#plota_queue_fila()
-#plota_assentos()
-#plt.show()
-#plt.close()
+plota_queue_fila()
+plota_assentos()
+plt.show()
+plt.close()
