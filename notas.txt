@@ -1,7 +1,7 @@
 Definir bem tempo medio para pegar uma bandeja e um talher
 Definir bem tempo medio para troca de container de refeicao
 Definir bem quantidade de assentos disponiveis
-
-Fazer fila inicial maior e contar pelo tempo
-
 Melhorar quantidades de refeicoes iniciais
+
+
+*** Resolvido: a fila inicia 15 minutos antes para acumulo de pessoas. Apos 900 segundos (15 minutos) o recurso fila principal é liberado ***

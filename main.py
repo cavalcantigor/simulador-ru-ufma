@@ -2,14 +2,16 @@ import simpy
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from coletaDados import ColetaDados
 
 # Variaveis globais
 
-TEMPO_SIMULACAO = 8100							# Tempo total de simulacao (segundos) - corresponde ao horario das 11:30 as 13:45
+# Tempo adicionado 15 minutos iniciais
+TEMPO_SIMULACAO = 9000							# Tempo total de simulacao (segundos) - corresponde ao horario das 11:30 as 13:45
 
-TEMPO_ALTO_FLUXO = 5400							# Tempo de alto fluxo (segundos) - corresponde ao horario de 11:30 as 12:59
-TEMPO_MEDIO_FLUXO = 7200						# Tempo de medio fluxo (segundos) - corresponde ao horario de 13:00 as 13:29
-TEMPO_BAIXO_FLUXO = 8100						# Tempo de baixo fluxo (segundos) - corresponde ao horario de 13:30 as 13:45
+TEMPO_ALTO_FLUXO = 6300							# Tempo de alto fluxo (segundos) - corresponde ao horario de 11:30 as 12:59
+TEMPO_MEDIO_FLUXO = 8100						# Tempo de medio fluxo (segundos) - corresponde ao horario de 13:00 as 13:29
+TEMPO_BAIXO_FLUXO = 9000						# Tempo de baixo fluxo (segundos) - corresponde ao horario de 13:30 as 13:45
 
 TEMPO_MEDIO_REFEICAO = 10						# Tempo medio de refeicao (minutos) para uma pessoa
 
@@ -64,8 +66,8 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	# Libera fila secundaria
 	fila_secundaria.release(req_fila_secundaria)
 	
-	# Tempo para escolher talher e bandeja - tempo medio de escolha
-	yield env.timeout(3)
+	# Tempo para escolher talher e bandeja
+	yield env.process(get_talher(env))
 	
 	req_bandeja_1 = recurso_bandeja_1.request()
 	
@@ -127,6 +129,9 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	
 	print('%s completou seu ciclo e saiu do restaurante no tempo %.1f' % (nome, env.now))
 	
+	# Adicionando uma saida aos dados
+	dados.addSaida()
+	
 # Fim individuo
 
 
@@ -144,6 +149,11 @@ def get_fila(env):
 	
 # Fim get_fila
 
+def get_talher(env):
+	
+	yield env.timeout(3)
+	
+# Fim get_talher
 
 def get_refeicao(env, i):
 	
@@ -155,12 +165,16 @@ def get_refeicao(env, i):
 		
 		QTD_INICIAIS_BANDEJAS[i] = QTD_REFEICOES_BANDEJA[i]
 		
+		dados.addAbastecimento(i)
+		
+		dados.addTempoAbastecimento(25)
+		
 	else:
 		yield env.timeout(3)
 
 # Fim get_refeicao
 		
-def gerador_individuo(env, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
+def gerador_individuo(env, flag, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
 	
 	request = fila_principal.request()
 	yield request
@@ -197,10 +211,14 @@ def gerador_individuo(env, fila_principal, fila_secundaria, recurso_talher, recu
 		# Inicia processo para individuo
 		env.process(individuo(env, ('Individuo %d' % i), fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento))
 		
+		# Adicionando mais uma entrada as estatisticas
+		dados.addEntrada()
+		
 		# Incrementa quantidade de pessoas que chegaram
 		i += 1
 		
-		if i == QUANTIDADE_INICIAL_FILA:
+		if env.now >= 900 and flag == True:
+			flag = False
 			fila_principal.release(request)
 		# Fim if
 	# Fim while
@@ -208,8 +226,9 @@ def gerador_individuo(env, fila_principal, fila_secundaria, recurso_talher, recu
 # Fim gerador_individuo
 
 
-def print_stats(res):
-	print('%d de %d estao alocados.' % (res.count, res.capacity))
+def print_stats(res, nome):
+	print('\n\n%s:' % nome)
+	print('  %d de %d estao alocados.' % (res.count, res.capacity))
 	print('  Usuarios:', res.users)
 	print('  Quantidade em fila: %d' % len(res.queue))
 
@@ -222,7 +241,6 @@ def plota_queue_fila():
 	plt.grid(True)
 	plt.xlabel('Tempo de Simulacao')
 	plt.ylabel('Tamanho da fila')
-	#plt.show()
 
 # Fim plota_queue_fila
 
@@ -233,7 +251,6 @@ def plota_assentos():
 	plt.grid(True)
 	plt.xlabel('Tempo de Simulacao')
 	plt.ylabel('Assentos ocupados')
-	#plt.show()
 
 # Fim plota_assentos
 	
@@ -267,8 +284,11 @@ recurso_bandeja_4 = simpy.Resource(env, 1)
 # Cria recurso assento
 recurso_assento = simpy.Resource(env, 200)
 
+# Flag para uso na rotina de geracao de individuo
+flag = True
+
 # Processo de geracao de individuos
-proc = env.process(gerador_individuo(env, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento))
+proc = env.process(gerador_individuo(env, flag, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento))
 
 # Variaveis para obtencao de grafico da queue da fila principal
 lista_tempos = []
@@ -277,11 +297,25 @@ lista_lotacao = []
 # Variavel para obtencao de grafico dos assentos
 lista_assentos_ocupados = []
 
+# Dados da simulacao para estatistica
+dados = ColetaDados()
+
 # Roda a simulacao
 env.run(until=TEMPO_SIMULACAO)
 
-print_stats(fila_principal)
+# Printa status das filas
+print_stats(fila_principal, 'Fila Principal')
+print_stats(fila_secundaria, 'Fila Secundaria')
+print_stats(recurso_talher, 'Talher')
+print_stats(recurso_bandeja_1, 'Bandeja 1')
+print_stats(recurso_bandeja_2, 'Bandeja 2')
+print_stats(recurso_bandeja_3, 'Bandeja 3')
+print_stats(recurso_bandeja_4, 'Bandeja 4')
 
-plota_queue_fila()
-plota_assentos()
-plt.show()
+# Printa os dados coletados
+dados.printDados()
+
+#plota_queue_fila()
+#plota_assentos()
+#plt.show()
+#plt.close()
