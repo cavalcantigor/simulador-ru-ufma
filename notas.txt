@@ -1,3 +1,7 @@
 Definir bem tempo medio para pegar uma bandeja e um talher
 Definir bem tempo medio para troca de container de refeicao
 Definir bem quantidade de assentos disponiveis
+
+Fazer fila inicial maior e contar pelo tempo
+
+Melhorar quantidades de refeicoes iniciais
