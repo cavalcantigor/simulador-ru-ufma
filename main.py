@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # Variaveis globais
 
-TEMPO_SIMULACAO = 600#8100						# Tempo total de simulacao (segundos) - corresponde ao horario das 11:30 as 13:45
+TEMPO_SIMULACAO = 8100							# Tempo total de simulacao (segundos) - corresponde ao horario das 11:30 as 13:45
 
 TEMPO_ALTO_FLUXO = 5400							# Tempo de alto fluxo (segundos) - corresponde ao horario de 11:30 as 12:59
 TEMPO_MEDIO_FLUXO = 7200						# Tempo de medio fluxo (segundos) - corresponde ao horario de 13:00 as 13:29
@@ -24,6 +24,7 @@ QUANTIDADE_INICIAL_FILA = 30					# Quantidade inicial de pessoas na fila
 
 QTD_REFEICOES_BANDEJA = [150, 230, 80, 130] 	# Quantidade de refeicoes servidas por bandeja
 QTD_INICIAIS_BANDEJAS = [150, 230, 80, 130]		# Quantidades iniciais das refeicoes
+
 
 def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
 
@@ -215,22 +216,24 @@ def print_stats(res):
 # Fim print_stats
 
 def plota_queue_fila():
+	plt.figure(1)
 	plt.plot(lista_tempos, lista_lotacao, 'go')
 	plt.plot(lista_tempos, lista_lotacao, 'k:', color='orange')
 	plt.grid(True)
 	plt.xlabel('Tempo de Simulacao')
 	plt.ylabel('Tamanho da fila')
-	plt.show()
+	#plt.show()
 
 # Fim plota_queue_fila
 
 def plota_assentos():
+	plt.figure(2)
 	plt.plot(lista_tempos, lista_assentos_ocupados, 'go')
 	plt.plot(lista_tempos, lista_assentos_ocupados, 'k:', color='orange')
 	plt.grid(True)
 	plt.xlabel('Tempo de Simulacao')
 	plt.ylabel('Assentos ocupados')
-	plt.show()
+	#plt.show()
 
 # Fim plota_assentos
 	
@@ -281,3 +284,4 @@ print_stats(fila_principal)
 
 plota_queue_fila()
 plota_assentos()
+plt.show()
