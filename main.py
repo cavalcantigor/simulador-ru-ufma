@@ -28,6 +28,8 @@ QUANTIDADE_INICIAL_FILA = 30					# Quantidade inicial de pessoas na fila
 QTD_REFEICOES_BANDEJA = [150, 230, 80, 130] 	# Quantidade de refeicoes servidas por bandeja
 QTD_INICIAIS_BANDEJAS = [150, 230, 80, 130]		# Quantidades iniciais das refeicoes
 
+QTD_ASSENTOS = 200								# Quantidade de assentos disponiveis no restaurante
+
 def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
 
 	# Cria requisicao para fila principal
@@ -74,6 +76,8 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	# Requisita recurso bandeja 1
 	yield req_bandeja_1
 	
+	tempo_ini = env.now
+	
 	print('%s chegou na bandeja 1 no tempo %.1f' % (nome, env.now))
 	
 	# Libera talher
@@ -89,6 +93,11 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	print('%s chegou na bandeja 2 no tempo %.1f' % (nome, env.now))
 	
 	recurso_bandeja_1.release(req_bandeja_1)
+	
+	tempo_fim = env.now
+	
+	dados.addOcupacaoB1(tempo_fim - tempo_ini)
+	dados.addTempoOcupacaoB1(env.now - 900)
 	
 	# Pega refeicao e reabastece se for o caso
 	yield env.process(get_refeicao(env, 1))
@@ -169,6 +178,8 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	# Requisita recurso bandeja 1
 	yield req_bandeja_1
 	
+	tempo_ini = env.now
+	
 	print('%s chegou na bandeja 1 no tempo %.1f' % (nome, env.now))
 	
 	# Libera talher
@@ -184,6 +195,11 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	print('%s chegou na bandeja 2 no tempo %.1f' % (nome, env.now))
 	
 	recurso_bandeja_1.release(req_bandeja_1)
+	
+	tempo_fim = env.now
+	
+	dados.addOcupacaoB1(tempo_fim - tempo_ini)
+	dados.addTempoOcupacaoB1(env.now - 900)
 	
 	# Pega refeicao e reabastece se for o caso
 	yield env.process(get_refeicao(env, 1))
@@ -228,6 +244,25 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	dados.addSaida()
 	
 # Fim individuo_furao
+
+def rotina_bandeja(env, recurso_atual, recurso_anterior, requisicao_anterior):
+
+	req_bandeja_1 = recurso_bandeja_1.request()
+	
+	# Requisita recurso bandeja 1
+	yield req_bandeja_1
+	
+	tempo_ini = env.now
+	
+	print('%s chegou na bandeja 1 no tempo %.1f' % (nome, env.now))
+	
+	# Libera talher
+	recurso_talher.release(req_talher)
+	
+	# Pega refeicao e reabastece se for o caso
+	yield env.process(get_refeicao(env, 0))
+	
+# Fim rotina_bandeja_1
 
 def get_fila(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
 	
@@ -354,12 +389,20 @@ def plota_assentos():
 	plt.figure(2)
 	plt.plot(lista_tempos, lista_assentos_ocupados, 'go')
 	plt.plot(lista_tempos, lista_assentos_ocupados, 'k:', color='orange')
+	plt.axhline(y=QTD_ASSENTOS, linewidth=1, color='r') # Desenha limite de quantidade de assentos
 	plt.grid(True)
 	plt.xlabel('Tempo de Simulacao')
 	plt.ylabel('Assentos ocupados')
 
 # Fim plota_assentos
-	
+
+def plota_ocupacao_b1():
+	plt.figure(3)
+	plt.plot(dados.getTempoOcupacaoB1(), dados.lista_utilizacao_b1(), 'go')
+	plt.plot(dados.getTempoOcupacaoB1(), dados.lista_utilizacao_b1(), 'k:', color='orange')
+	plt.grid(True)
+	plt.xlabel('Tempo de Simulacao')
+	plt.ylabel('Ocupacao da bandeja 1')
 
 print('Simulacao da fila do RU')
 
@@ -388,7 +431,7 @@ recurso_bandeja_3 = simpy.Resource(env, 1)
 recurso_bandeja_4 = simpy.Resource(env, 1)
 
 # Cria recurso assento
-recurso_assento = simpy.Resource(env, 200)
+recurso_assento = simpy.Resource(env, QTD_ASSENTOS)
 
 # Flag para uso na rotina de geracao de individuo
 flag = True
@@ -427,7 +470,11 @@ print_stats(recurso_bandeja_4, 'Bandeja 4')
 # Printa os dados coletados
 dados.printDados()
 
-plota_queue_fila()
-plota_assentos()
+#plota_queue_fila()
+#plota_assentos()
+plota_ocupacao_b1()
 plt.show()
 plt.close()
+
+print(dados.getOcupacaoB1()[:10])
+print(dados.getTempoOcupacaoB1()[:10])
