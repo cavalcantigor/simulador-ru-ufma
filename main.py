@@ -101,7 +101,8 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	dados.addOcupacao((tempo_fim_b4 - tempo_inicio_b4), 4)
 	dados.addTempoOcupacao((tempo_fim_b4 - 900), 4)
 	
-	yield env.timeout(np.random.normal(TEMPO_MEDIO_REFEICAO, 3.0, size=None) * 60)
+	# Media de 10 minutos para almocar
+	yield env.timeout(TEMPO_MEDIO_REFEICAO * 60)
 	
 	recurso_assento.release(req_assento)
 	
@@ -172,7 +173,8 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	dados.addOcupacao((tempo_fim_b4 - tempo_inicio_b4), 4)
 	dados.addTempoOcupacao((tempo_fim_b4 - 900), 4)
 	
-	yield env.timeout(abs(np.random.normal(TEMPO_MEDIO_REFEICAO, 3.0, size=None)) * 60)
+	# Media de 10 minutos para almocar
+	yield env.timeout(TEMPO_MEDIO_REFEICAO * 60)
 	
 	recurso_assento.release(req_assento)
 	
