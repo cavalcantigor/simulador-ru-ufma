@@ -16,14 +16,14 @@ TEMPO_BAIXO_FLUXO = 9000						# Tempo de baixo fluxo (segundos) - corresponde ao
 
 TEMPO_MEDIO_REFEICAO = 10						# Tempo medio de refeicao (minutos) para uma pessoa
 
+TEMPO_GET_REFEICAO = 3							# Tempo (segundos) em que individuo leva para ser servido em media
+TEMPO_GET_TALHER = 3							# Tempo (segundos) em que o individuo leva para pegar talher
+
 CHEGADAS_ALTO_FLUXO = 5							# Tempo entre chegadas em alto fluxo (chegadas por minuto)
 CHEGADAS_MEDIO_FLUXO = 15						# Tempo entre chegadas em medio fluxo (chegadas por minuto)
 CHEGADAS_BAIXO_FLUXO = 30						# Tempo entre chegadas em baixo fluxo (chegadas por minuto)
 
-CHEGADAS_POR_MINUTO = 5							# Quantidade de chegadas em 1 minuto
 PROBABILIDADE_FURO = 15							# Probabilidade de ter alguem furando a fila
-
-QUANTIDADE_INICIAL_FILA = 30					# Quantidade inicial de pessoas na fila
 
 QTD_REFEICOES_BANDEJA = [150, 230, 80, 130] 	# Quantidade de refeicoes servidas por bandeja
 QTD_INICIAIS_BANDEJAS = [150, 230, 80, 130]		# Quantidades iniciais das refeicoes
@@ -101,7 +101,7 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	dados.addOcupacao((tempo_fim_b4 - tempo_inicio_b4), 4)
 	dados.addTempoOcupacao((tempo_fim_b4 - 900), 4)
 	
-	yield env.timeout(abs(np.random.normal(TEMPO_MEDIO_REFEICAO, 3.0, size=None)) * 60)
+	yield env.timeout(np.random.normal(TEMPO_MEDIO_REFEICAO, 3.0, size=None) * 60)
 	
 	recurso_assento.release(req_assento)
 	
@@ -228,7 +228,7 @@ def get_fila(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso
 		# Tempo do furao pegar a fila
 		yield env.timeout(1)
 	else:
-		yield env.timeout(abs(np.random.normal(2, 0.5, size=None))) # Gera um atraso de media 2 variacao 1
+		yield env.timeout(np.random.normal(2, 0.2, size=None)) # Gera um atraso de media 2 variacao 0.2
 	
 	# Fim if
 	
@@ -236,7 +236,7 @@ def get_fila(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso
 
 def get_talher(env):
 	
-	yield env.timeout(3)
+	yield env.timeout(np.random.normal(TEMPO_GET_TALHER, 0.7, size=None))
 	
 # Fim get_talher
 
@@ -255,7 +255,7 @@ def get_refeicao(env, i):
 		dados.addTempoAbastecimento(25)
 		
 	else:
-		yield env.timeout(3)
+		yield env.timeout(np.random.normal(TEMPO_GET_REFEICAO, 0.7, size=None))
 
 # Fim get_refeicao
 		
@@ -268,13 +268,13 @@ def gerador_individuo(env, flag, fila_principal, fila_secundaria, recurso_talher
 	while True:
 		
 		if env.now <= TEMPO_ALTO_FLUXO:
-			tempo_chegada = abs(np.random.normal(CHEGADAS_ALTO_FLUXO, 3.0, size=None))
+			tempo_chegada = np.random.normal(CHEGADAS_ALTO_FLUXO, 1.0, size=None)
 		else:
 			if env.now <= TEMPO_MEDIO_FLUXO:
-				tempo_chegada = abs(np.random.normal(CHEGADAS_MEDIO_FLUXO, 3.0, size=None))
+				tempo_chegada = np.random.normal(CHEGADAS_MEDIO_FLUXO, 2.0, size=None)
 			else:
 				if env.now <= TEMPO_BAIXO_FLUXO:
-					tempo_chegada = abs(np.random.normal(CHEGADAS_BAIXO_FLUXO, 5.0, size=None))
+					tempo_chegada = np.random.normal(CHEGADAS_BAIXO_FLUXO, 3.0, size=None)
 				# Fim if
 			# Fim if
 		# Fim if
@@ -419,9 +419,9 @@ print_stats(recurso_bandeja_4, 'Bandeja 4')
 # Printa os dados coletados
 dados.printDados()
 
-plota_queue_fila()
-plota_assentos()
-plota_ocupacao_bandeja()
+#plota_queue_fila()
+#plota_assentos()
+#plota_ocupacao_bandeja()
 plt.show()
 plt.close()
 
