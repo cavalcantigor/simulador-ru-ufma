@@ -71,24 +71,16 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	# Tempo para escolher talher e bandeja
 	yield env.process(get_talher(env))
 	
-	tempo_inicio_b1 = env.now
+	req_bandeja_1, tempo_fim, tempo_inicio_b1 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_1, 'bandeja 1', 0, recurso_talher, req_talher))
 	
-	req_bandeja_1, tempo_fim = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_1, 'bandeja 1', 0, recurso_talher, req_talher))
-	
-	tempo_inicio_b2 = env.now
-	
-	req_bandeja_2, tempo_fim_b1 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_2, 'bandeja 2', 1, recurso_bandeja_1, req_bandeja_1))
+	req_bandeja_2, tempo_fim_b1, tempo_inicio_b2 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_2, 'bandeja 2', 1, recurso_bandeja_1, req_bandeja_1))
 	
 	dados.addOcupacaoB1(tempo_fim_b1 - tempo_inicio_b1)
 	dados.addTempoOcupacaoB1(tempo_fim_b1 - 900)
 	
-	tempo_inicio_b3 = env.now
+	req_bandeja_3, tempo_fim_b2, tempo_inicio_b3 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_3, 'bandeja 3', 2, recurso_bandeja_2, req_bandeja_2))
 	
-	req_bandeja_3, tempo_fim_b2 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_3, 'bandeja 3', 2, recurso_bandeja_2, req_bandeja_2))
-	
-	tempo_inicio_b4 = env.now
-	
-	req_bandeja_4, tempo_fim_b3 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_4, 'bandeja 4', 3, recurso_bandeja_3, req_bandeja_3))
+	req_bandeja_4, tempo_fim_b3, tempo_inicio_b4 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_4, 'bandeja 4', 3, recurso_bandeja_3, req_bandeja_3))
 	
 	req_assento = recurso_assento.request()
 	
@@ -141,24 +133,16 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	# Tempo para escolher talher e bandeja
 	yield env.process(get_talher(env))
 	
-	tempo_inicio_b1 = env.now
+	req_bandeja_1, tempo_fim, tempo_inicio_b1 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_1, 'bandeja 1', 0, recurso_talher, req_talher))
 	
-	req_bandeja_1, tempo_fim = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_1, 'bandeja 1', 0, recurso_talher, req_talher))
-	
-	tempo_inicio_b2 = env.now
-	
-	req_bandeja_2, tempo_fim_b1 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_2, 'bandeja 2', 1, recurso_bandeja_1, req_bandeja_1))
+	req_bandeja_2, tempo_fim_b1, tempo_inicio_b2 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_2, 'bandeja 2', 1, recurso_bandeja_1, req_bandeja_1))
 	
 	dados.addOcupacaoB1(tempo_fim_b1 - tempo_inicio_b1)
 	dados.addTempoOcupacaoB1(tempo_fim_b1 - 900)
 	
-	tempo_inicio_b3 = env.now
+	req_bandeja_3, tempo_fim_b2, tempo_inicio_b3 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_3, 'bandeja 3', 2, recurso_bandeja_2, req_bandeja_2))
 	
-	req_bandeja_3, tempo_fim_b2 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_3, 'bandeja 3', 2, recurso_bandeja_2, req_bandeja_2))
-	
-	tempo_inicio_b4 = env.now
-	
-	req_bandeja_4, tempo_fim_b3 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_4, 'bandeja 4', 3, recurso_bandeja_3, req_bandeja_3))
+	req_bandeja_4, tempo_fim_b3, tempo_inicio_b4 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_4, 'bandeja 4', 3, recurso_bandeja_3, req_bandeja_3))
 	
 	req_assento = recurso_assento.request()
 	
@@ -186,18 +170,21 @@ def rotina_bandeja(env, nome, recurso_atual, str_recurso_atual, i, recurso_anter
 	# Requisita recurso atual
 	yield req
 	
+	# Quando consegue o recurso eh que o tempo conta de fato
+	tempo_ini = env.now
+	
 	print('%s chegou na %s no tempo %.1f' % (nome, str_recurso_atual, env.now))
 	
 	# Libera recurso anterior
 	recurso_anterior.release(req_anterior)
 	
-	# Tempo em que libera o recurso
+	# Tempo em que libera o recurso anterior
 	tempo_release = env.now
 	
 	# Pega refeicao e reabastece se for o caso
 	yield env.process(get_refeicao(env, i))
 	
-	return req, tempo_release
+	return req, tempo_release, tempo_ini
 	
 # Fim rotina_bandeja
 
