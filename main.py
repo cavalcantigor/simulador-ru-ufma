@@ -75,12 +75,18 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	
 	req_bandeja_2, tempo_fim_b1, tempo_inicio_b2 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_2, 'bandeja 2', 1, recurso_bandeja_1, req_bandeja_1))
 	
-	dados.addOcupacaoB1(tempo_fim_b1 - tempo_inicio_b1)
-	dados.addTempoOcupacaoB1(tempo_fim_b1 - 900)
+	dados.addOcupacao((tempo_fim_b1 - tempo_inicio_b1), 1)
+	dados.addTempoOcupacao((tempo_fim_b1 - 900), 1)
 	
 	req_bandeja_3, tempo_fim_b2, tempo_inicio_b3 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_3, 'bandeja 3', 2, recurso_bandeja_2, req_bandeja_2))
 	
+	dados.addOcupacao((tempo_fim_b2 - tempo_inicio_b2), 2)
+	dados.addTempoOcupacao((tempo_fim_b2 - 900), 2)
+	
 	req_bandeja_4, tempo_fim_b3, tempo_inicio_b4 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_4, 'bandeja 4', 3, recurso_bandeja_3, req_bandeja_3))
+	
+	dados.addOcupacao((tempo_fim_b3 - tempo_inicio_b3), 3)
+	dados.addTempoOcupacao((tempo_fim_b3 - 900), 3)
 	
 	req_assento = recurso_assento.request()
 	
@@ -91,6 +97,9 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	recurso_bandeja_4.release(req_bandeja_4)
 	
 	tempo_fim_b4 = env.now
+	
+	dados.addOcupacao((tempo_fim_b4 - tempo_inicio_b4), 4)
+	dados.addTempoOcupacao((tempo_fim_b4 - 900), 4)
 	
 	yield env.timeout(abs(np.random.normal(TEMPO_MEDIO_REFEICAO, 3.0, size=None)) * 60)
 	
@@ -137,12 +146,18 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	
 	req_bandeja_2, tempo_fim_b1, tempo_inicio_b2 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_2, 'bandeja 2', 1, recurso_bandeja_1, req_bandeja_1))
 	
-	dados.addOcupacaoB1(tempo_fim_b1 - tempo_inicio_b1)
-	dados.addTempoOcupacaoB1(tempo_fim_b1 - 900)
+	dados.addOcupacao((tempo_fim_b1 - tempo_inicio_b1), 1)
+	dados.addTempoOcupacao((tempo_fim_b1 - 900), 1)
 	
 	req_bandeja_3, tempo_fim_b2, tempo_inicio_b3 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_3, 'bandeja 3', 2, recurso_bandeja_2, req_bandeja_2))
 	
+	dados.addOcupacao((tempo_fim_b2 - tempo_inicio_b2), 2)
+	dados.addTempoOcupacao((tempo_fim_b2 - 900), 2)
+	
 	req_bandeja_4, tempo_fim_b3, tempo_inicio_b4 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_4, 'bandeja 4', 3, recurso_bandeja_3, req_bandeja_3))
+	
+	dados.addOcupacao((tempo_fim_b3 - tempo_inicio_b3), 3)
+	dados.addTempoOcupacao((tempo_fim_b3 - 900), 3)
 	
 	req_assento = recurso_assento.request()
 	
@@ -151,6 +166,11 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	print('%s chegou no assento no tempo %.1f' % (nome, env.now))
 	
 	recurso_bandeja_4.release(req_bandeja_4)
+	
+	tempo_fim_b4 = env.now
+	
+	dados.addOcupacao((tempo_fim_b4 - tempo_inicio_b4), 4)
+	dados.addTempoOcupacao((tempo_fim_b4 - 900), 4)
 	
 	yield env.timeout(abs(np.random.normal(TEMPO_MEDIO_REFEICAO, 3.0, size=None)) * 60)
 	
@@ -320,13 +340,18 @@ def plota_assentos():
 
 # Fim plota_assentos
 
-def plota_ocupacao_b1():
+def plota_ocupacao_bandeja():
 	plt.figure(3)
-	plt.plot(dados.getTempoOcupacaoB1(), dados.lista_utilizacao_b1(), 'go')
-	plt.plot(dados.getTempoOcupacaoB1(), dados.lista_utilizacao_b1(), 'k:', color='orange')
+	plt.plot(dados.getTempoOcupacao(1), dados.lista_utilizacao(1), 'k:', color='red', label="Bandeja 1")
+	plt.plot(dados.getTempoOcupacao(2), dados.lista_utilizacao(2), 'k:', color='orange', label="Bandeja 2")
+	plt.plot(dados.getTempoOcupacao(3), dados.lista_utilizacao(3), 'k:', color='green', label="Bandeja 3")
+	plt.plot(dados.getTempoOcupacao(4), dados.lista_utilizacao(4), 'k:', color='blue', label="Bandeja 4")
 	plt.grid(True)
+	plt.legend(loc = 'lower right')
 	plt.xlabel('Tempo de Simulacao')
-	plt.ylabel('Ocupacao da bandeja 1')
+	plt.ylabel('Ocupacao da bandeja')
+
+# Fim plota_ocupacao_bandeja
 
 print('Simulacao da fila do RU')
 
@@ -394,11 +419,11 @@ print_stats(recurso_bandeja_4, 'Bandeja 4')
 # Printa os dados coletados
 dados.printDados()
 
-#plota_queue_fila()
-#plota_assentos()
-plota_ocupacao_b1()
+plota_queue_fila()
+plota_assentos()
+plota_ocupacao_bandeja()
 plt.show()
 plt.close()
 
-print(dados.getOcupacaoB1()[:10])
-print(dados.getTempoOcupacaoB1()[:10])
+#print(dados.getOcupacao(3)[:10])
+#print(dados.getTempoOcupacao(3)[:10])
