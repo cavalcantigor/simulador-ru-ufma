@@ -10,6 +10,12 @@ class ColetaDados(object):
 	
 	tempo_ocupacao_b1 = []
 	ocupacao_b1 = []
+	tempo_ocupacao_b2 = []
+	ocupacao_b2 = []
+	tempo_ocupacao_b3 = []
+	ocupacao_b3 = []
+	tempo_ocupacao_b4 = []
+	ocupacao_b4 = []
 	
 	def __init__ (self):
 		
@@ -17,8 +23,16 @@ class ColetaDados(object):
 		qtd_saidas = 0
 		qtd_abastecimentos = [0,0,0,0]
 		qtd_furoes = 0
-		tempo_ocupacao_b1 = 0.0
 		
+		tempo_ocupacao_b1 = []
+		ocupacao_b1 = []
+		tempo_ocupacao_b2 = []
+		ocupacao_b2 = []
+		tempo_ocupacao_b3 = []
+		ocupacao_b3 = []
+		tempo_ocupacao_b4 = []
+		ocupacao_b4 = []
+	
 	# Fim __init__
 	
 	def addEntrada(self):
@@ -57,41 +71,100 @@ class ColetaDados(object):
 	
 	# Fim getFurao
 	
-	def addOcupacaoB1(self, t):
+	def addOcupacao(self, t, i):
 		
-		last = 0
-		if len(self.ocupacao_b1) > 0:
-			last = self.ocupacao_b1[-1]
+		if i == 1:		
+			last = 0
+			if len(self.ocupacao_b1) > 0:
+				last = self.ocupacao_b1[-1]
+			
+			self.ocupacao_b1.append(t + last)
+		elif i == 2:
+			last = 0
+			if len(self.ocupacao_b2) > 0:
+				last = self.ocupacao_b2[-1]
+			
+			self.ocupacao_b2.append(t + last)
+		elif i == 3:
+			last = 0
+			if len(self.ocupacao_b3) > 0:
+				last = self.ocupacao_b3[-1]
+			
+			self.ocupacao_b3.append(t + last)
+		else:
+			last = 0
+			if len(self.ocupacao_b4) > 0:
+				last = self.ocupacao_b4[-1]
+			
+			self.ocupacao_b4.append(t + last)
+		# Fim if
 		
-		self.ocupacao_b1.append(t + last)
+	# Fim addOcupacao
 	
-	# Fim addOcupacaoB1
-	
-	def addTempoOcupacaoB1(self, t):
+	def addTempoOcupacao(self, t, i):
 		
-		self.tempo_ocupacao_b1.append(t)
+		if i == 1:		
+			self.tempo_ocupacao_b1.append(t)
+		elif i == 2:
+			self.tempo_ocupacao_b2.append(t)
+		elif i == 3:
+			self.tempo_ocupacao_b3.append(t)
+		else:
+			self.tempo_ocupacao_b4.append(t)
+		# Fim if
 	
-	# Fim addOcupacaoB1
+	# Fim addTempoOcupacao
 	
-	def getOcupacaoB1(self):
+	def getOcupacao(self, i):
+
+		if i == 1:		
+			return self.ocupacao_b1
+		elif i == 2:
+			return self.ocupacao_b2
+		elif i == 3:
+			return self.ocupacao_b3
+		else:
+			return self.ocupacao_b4
+		# Fim if
 		
-		return self.ocupacao_b1
+	# Fim getOcupacao
 	
-	# Fim getOcupacaoB1
-	
-	def getTempoOcupacaoB1(self):
+	def getTempoOcupacao(self, i):
 		
-		return self.tempo_ocupacao_b1
+		if i == 1:		
+			return self.tempo_ocupacao_b1
+		elif i == 2:
+			return self.tempo_ocupacao_b2
+		elif i == 3:
+			return self.tempo_ocupacao_b3
+		else:
+			return self.tempo_ocupacao_b4
+		# Fim if
+		
+	# Fim getTempoOcupacao
 	
-	# Fim getOcupacaoB1
-	
-	def lista_utilizacao_b1(self):
+	def lista_utilizacao(self, i):
 		
 		lista_utilizacao = []
-		for i in range(0, len(self.ocupacao_b1)):
-			lista_utilizacao.append((self.ocupacao_b1[i]/self.tempo_ocupacao_b1[i])*100)
-		
-		return lista_utilizacao
+		if i == 1:		
+			for i in range(0, len(self.ocupacao_b1)):
+				lista_utilizacao.append((self.ocupacao_b1[i]/self.tempo_ocupacao_b1[i])*100)
+			return lista_utilizacao
+		elif i == 2:
+			for i in range(0, len(self.ocupacao_b2)):
+				lista_utilizacao.append((self.ocupacao_b2[i]/self.tempo_ocupacao_b2[i])*100)
+			return lista_utilizacao
+		elif i == 3:
+			for i in range(0, len(self.ocupacao_b3)):
+				lista_utilizacao.append((self.ocupacao_b3[i]/self.tempo_ocupacao_b3[i])*100)
+			return lista_utilizacao
+		else:
+			for i in range(0, len(self.ocupacao_b4)):
+				lista_utilizacao.append((self.ocupacao_b4[i]/self.tempo_ocupacao_b4[i])*100)
+			return lista_utilizacao
+		# Fim if
+	
+	# Fim lista_utilizacao
 	
 	def printDados(self):
 		print('\n\nEstatisticas:')
