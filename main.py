@@ -71,58 +71,24 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	# Tempo para escolher talher e bandeja
 	yield env.process(get_talher(env))
 	
-	req_bandeja_1 = recurso_bandeja_1.request()
+	tempo_inicio_b1 = env.now
 	
-	# Requisita recurso bandeja 1
-	yield req_bandeja_1
+	req_bandeja_1, tempo_fim = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_1, 'bandeja 1', 0, recurso_talher, req_talher))
 	
-	tempo_ini = env.now
+	tempo_inicio_b2 = env.now
 	
-	print('%s chegou na bandeja 1 no tempo %.1f' % (nome, env.now))
+	req_bandeja_2, tempo_fim_b1 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_2, 'bandeja 2', 1, recurso_bandeja_1, req_bandeja_1))
 	
-	# Libera talher
-	recurso_talher.release(req_talher)
+	dados.addOcupacaoB1(tempo_fim_b1 - tempo_inicio_b1)
+	dados.addTempoOcupacaoB1(tempo_fim_b1 - 900)
 	
-	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 0))
+	tempo_inicio_b3 = env.now
 	
-	req_bandeja_2 = recurso_bandeja_2.request()
+	req_bandeja_3, tempo_fim_b2 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_3, 'bandeja 3', 2, recurso_bandeja_2, req_bandeja_2))
 	
-	yield req_bandeja_2
+	tempo_inicio_b4 = env.now
 	
-	print('%s chegou na bandeja 2 no tempo %.1f' % (nome, env.now))
-	
-	recurso_bandeja_1.release(req_bandeja_1)
-	
-	tempo_fim = env.now
-	
-	dados.addOcupacaoB1(tempo_fim - tempo_ini)
-	dados.addTempoOcupacaoB1(env.now - 900)
-	
-	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 1))
-	
-	req_bandeja_3 = recurso_bandeja_3.request()
-	
-	yield req_bandeja_3
-	
-	print('%s chegou na bandeja 3 no tempo %.1f' % (nome, env.now))
-	
-	recurso_bandeja_2.release(req_bandeja_2)
-	
-	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 2))
-	
-	req_bandeja_4 = recurso_bandeja_4.request()
-	
-	yield req_bandeja_4
-	
-	print('%s chegou na bandeja 4 no tempo %.1f' % (nome, env.now))
-	
-	recurso_bandeja_3.release(req_bandeja_3)
-	
-	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 3))
+	req_bandeja_4, tempo_fim_b3 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_4, 'bandeja 4', 3, recurso_bandeja_3, req_bandeja_3))
 	
 	req_assento = recurso_assento.request()
 	
@@ -131,6 +97,8 @@ def individuo(env, nome, fila_principal, fila_secundaria, recurso_talher, recurs
 	print('%s chegou no assento no tempo %.1f' % (nome, env.now))
 	
 	recurso_bandeja_4.release(req_bandeja_4)
+	
+	tempo_fim_b4 = env.now
 	
 	yield env.timeout(abs(np.random.normal(TEMPO_MEDIO_REFEICAO, 3.0, size=None)) * 60)
 	
@@ -173,58 +141,24 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	# Tempo para escolher talher e bandeja
 	yield env.process(get_talher(env))
 	
-	req_bandeja_1 = recurso_bandeja_1.request()
+	tempo_inicio_b1 = env.now
 	
-	# Requisita recurso bandeja 1
-	yield req_bandeja_1
+	req_bandeja_1, tempo_fim = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_1, 'bandeja 1', 0, recurso_talher, req_talher))
 	
-	tempo_ini = env.now
+	tempo_inicio_b2 = env.now
 	
-	print('%s chegou na bandeja 1 no tempo %.1f' % (nome, env.now))
+	req_bandeja_2, tempo_fim_b1 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_2, 'bandeja 2', 1, recurso_bandeja_1, req_bandeja_1))
 	
-	# Libera talher
-	recurso_talher.release(req_talher)
+	dados.addOcupacaoB1(tempo_fim_b1 - tempo_inicio_b1)
+	dados.addTempoOcupacaoB1(tempo_fim_b1 - 900)
 	
-	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 0))
+	tempo_inicio_b3 = env.now
 	
-	req_bandeja_2 = recurso_bandeja_2.request()
+	req_bandeja_3, tempo_fim_b2 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_3, 'bandeja 3', 2, recurso_bandeja_2, req_bandeja_2))
 	
-	yield req_bandeja_2
+	tempo_inicio_b4 = env.now
 	
-	print('%s chegou na bandeja 2 no tempo %.1f' % (nome, env.now))
-	
-	recurso_bandeja_1.release(req_bandeja_1)
-	
-	tempo_fim = env.now
-	
-	dados.addOcupacaoB1(tempo_fim - tempo_ini)
-	dados.addTempoOcupacaoB1(env.now - 900)
-	
-	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 1))
-	
-	req_bandeja_3 = recurso_bandeja_3.request()
-	
-	yield req_bandeja_3
-	
-	print('%s chegou na bandeja 3 no tempo %.1f' % (nome, env.now))
-	
-	recurso_bandeja_2.release(req_bandeja_2)
-	
-	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 2))
-	
-	req_bandeja_4 = recurso_bandeja_4.request()
-	
-	yield req_bandeja_4
-	
-	print('%s chegou na bandeja 4 no tempo %.1f' % (nome, env.now))
-	
-	recurso_bandeja_3.release(req_bandeja_3)
-	
-	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 3))
+	req_bandeja_4, tempo_fim_b3 = yield env.process(rotina_bandeja(env, nome, recurso_bandeja_4, 'bandeja 4', 3, recurso_bandeja_3, req_bandeja_3))
 	
 	req_assento = recurso_assento.request()
 	
@@ -245,31 +179,34 @@ def individuo_furao(env, nome, fila_secundaria, recurso_talher, recurso_bandeja_
 	
 # Fim individuo_furao
 
-def rotina_bandeja(env, recurso_atual, recurso_anterior, requisicao_anterior):
+def rotina_bandeja(env, nome, recurso_atual, str_recurso_atual, i, recurso_anterior, req_anterior):
 
-	req_bandeja_1 = recurso_bandeja_1.request()
+	req = recurso_atual.request()
 	
-	# Requisita recurso bandeja 1
-	yield req_bandeja_1
+	# Requisita recurso atual
+	yield req
 	
-	tempo_ini = env.now
+	print('%s chegou na %s no tempo %.1f' % (nome, str_recurso_atual, env.now))
 	
-	print('%s chegou na bandeja 1 no tempo %.1f' % (nome, env.now))
+	# Libera recurso anterior
+	recurso_anterior.release(req_anterior)
 	
-	# Libera talher
-	recurso_talher.release(req_talher)
+	# Tempo em que libera o recurso
+	tempo_release = env.now
 	
 	# Pega refeicao e reabastece se for o caso
-	yield env.process(get_refeicao(env, 0))
+	yield env.process(get_refeicao(env, i))
 	
-# Fim rotina_bandeja_1
+	return req, tempo_release
+	
+# Fim rotina_bandeja
 
 def get_fila(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso_bandeja_1, recurso_bandeja_2, recurso_bandeja_3, recurso_bandeja_4, recurso_assento):
 	
 	# Escolhe um numero entre 1 e 100
 	n = random.randint(1, 100)
 	
-	if n >= PROBABILIDADE_FURO:
+	if n <= PROBABILIDADE_FURO:
 		
 		print('Valor de n: %d' % n)
 		
