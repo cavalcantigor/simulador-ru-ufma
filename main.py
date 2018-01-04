@@ -19,14 +19,16 @@ TEMPO_MEDIO_REFEICAO = 10						# Tempo medio de refeicao (minutos) para uma pess
 TEMPO_GET_REFEICAO = 3							# Tempo (segundos) em que individuo leva para ser servido em media
 TEMPO_GET_TALHER = 3							# Tempo (segundos) em que o individuo leva para pegar talher
 
-CHEGADAS_ALTO_FLUXO = 5							# Tempo entre chegadas em alto fluxo (chegadas por minuto)
-CHEGADAS_MEDIO_FLUXO = 15						# Tempo entre chegadas em medio fluxo (chegadas por minuto)
-CHEGADAS_BAIXO_FLUXO = 30						# Tempo entre chegadas em baixo fluxo (chegadas por minuto)
+CHEGADAS_ALTO_FLUXO = 5							# Tempo entre chegadas em alto fluxo (em segundos)
+CHEGADAS_MEDIO_FLUXO = 10						# Tempo entre chegadas em medio fluxo (em segundos)
+CHEGADAS_BAIXO_FLUXO = 15						# Tempo entre chegadas em baixo fluxo (em segundos)
 
-PROBABILIDADE_FURO = 15							# Probabilidade de ter alguem furando a fila
+PROBABILIDADE_FURO = 30							# Probabilidade de ter alguem furando a fila
 
-QTD_REFEICOES_BANDEJA = [150, 230, 80, 130] 	# Quantidade de refeicoes servidas por bandeja
-QTD_INICIAIS_BANDEJAS = [150, 230, 80, 130]		# Quantidades iniciais das refeicoes
+#QTD_REFEICOES_BANDEJA = [150, 230, 80, 130] 	# Quantidade de refeicoes servidas por bandeja
+QTD_REFEICOES_BANDEJA = [300, 460, 160, 260]
+#QTD_INICIAIS_BANDEJAS = [150, 230, 80, 130]		# Quantidades iniciais das refeicoes
+QTD_INICIAIS_BANDEJAS = [300, 460, 160, 260]
 
 QTD_ASSENTOS = 200								# Quantidade de assentos disponiveis no restaurante
 
@@ -216,8 +218,6 @@ def get_fila(env, nome, fila_principal, fila_secundaria, recurso_talher, recurso
 	n = random.randint(1, 100)
 	
 	if n <= PROBABILIDADE_FURO:
-		
-		print('Valor de n: %d' % n)
 		
 		# Incrementa a quantidade de furoes
 		dados.addFurao()
@@ -421,9 +421,9 @@ print_stats(recurso_bandeja_4, 'Bandeja 4')
 # Printa os dados coletados
 dados.printDados()
 
-#plota_queue_fila()
-#plota_assentos()
-#plota_ocupacao_bandeja()
+plota_queue_fila()
+plota_assentos()
+plota_ocupacao_bandeja()
 plt.show()
 plt.close()
 
